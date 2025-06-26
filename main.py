@@ -41,6 +41,8 @@ def ask(query: Query):
         return {"answer": "Transcript is not available for this video."}
     except Exception as e:
         return {"answer": f"Error fetching transcript: {str(e)}"}
+    
+    
 
     splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
     chunks = splitter.create_documents([transcript])
@@ -76,6 +78,7 @@ def ask(query: Query):
         return {"answer": answer}
     except Exception as e:
         return {"answer": f"Error during LLM invocation: {str(e)}"}
+    
 
 
 

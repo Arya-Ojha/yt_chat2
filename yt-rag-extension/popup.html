@@ -7,10 +7,15 @@
 </head>
 
 <body>
-    <h2>YouTube Q&A</h2>
-    <input type="text" id="question" placeholder="Ask a question..." />
-    <button id="askBtn">Ask</button>
-    <p id="response">Answer will appear here</p>
+    <h2>YouTube Video Q&A</h2>
+    <textarea id="question" placeholder="Ask a question about this video..."></textarea>
+    <div class="btn-group">
+        <button id="askBtn">Ask</button>
+        <button id="clearBtn">Clear</button>
+    </div>
+    <p id="loading" class="hidden"> Thinking...</p>
+    <p id="response">Your answer will appear here.</p>
+    <button id="copyBtn" class="hidden">📋 Copy Answer</button>
     <script src="popup.js"></script>
 </body>
 
