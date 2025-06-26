@@ -69,6 +69,13 @@ def ask(query: Query):
 
     llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash")
     parser = StrOutputParser()
+    
+    parallel_chain = RunnableParallel({
+    'context': retriever| RunnableLambda(format_docs),
+    'question': RunnablePassthrough()
+})
+    
+    main_chain = parallel_chain | prompt | llm | parser
 
     chain = (
         RunnableParallel({
@@ -78,7 +85,7 @@ def ask(query: Query):
     )
 
     try:
-        answer = chain.invoke({"question": question})
+        answer = main_chain.invoke({"question": question})
         return {"answer": answer}
     except Exception as e:
         return {"answer": f"Error during LLM invocation: {str(e)}"}
