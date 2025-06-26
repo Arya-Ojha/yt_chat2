@@ -3,7 +3,8 @@ from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_core.prompts import PromptTemplate
 from langchain_community.vectorstores import FAISS
 from langchain_core.runnables import RunnableParallel, RunnableLambda, RunnablePassthrough
@@ -47,7 +48,7 @@ def ask(query: Query):
     chunks = splitter.create_documents([transcript])
 
     # Embed & store
-    embeddings = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004")
+    embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
     vector_store = FAISS.from_documents(chunks, embeddings)
     retriever = vector_store.as_retriever(search_type="similarity", search_kwargs={'k': 4})
 
@@ -69,23 +70,16 @@ def ask(query: Query):
 
     llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash")
     parser = StrOutputParser()
-    
-    parallel_chain = RunnableParallel({
-    'context': retriever| RunnableLambda(format_docs),
-    'question': RunnablePassthrough()
-})
-    
-    main_chain = parallel_chain | prompt | llm | parser
-
-    chain = (
-        RunnableParallel({
-            "context": retriever | RunnableLambda(format_docs),
-            "question": RunnablePassthrough(),
-        }) | prompt | llm | parser
-    )
 
     try:
-        answer = main_chain.invoke({"question": question})
+        # Retrieve relevant docs and format context
+        docs = retriever.get_relevant_documents(question)
+        context = format_docs(docs)
+        # Prepare prompt input
+        prompt_input = {"context": context, "question": question}
+        # Generate answer
+        answer = llm.invoke(prompt.format(**prompt_input))
+        answer = parser.invoke(answer)
         return {"answer": answer}
     except Exception as e:
         return {"answer": f"Error during LLM invocation: {str(e)}"}
