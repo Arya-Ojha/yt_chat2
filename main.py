@@ -15,21 +15,18 @@ load_dotenv()
 
 app = FastAPI()
 
-# Allow frontend access (like from Chrome Extension)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # You can later restrict this
+    allow_origins=["*"], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# === Input Schema ===
 class Query(BaseModel):
     video_id: str
     question: str
 
-# === Route ===
 @app.post("/ask")
 def ask(query: Query):
     video_id = query.video_id
@@ -43,16 +40,13 @@ def ask(query: Query):
     except Exception as e:
         return {"answer": f"Error fetching transcript: {str(e)}"}
 
-    # Split transcript
     splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
     chunks = splitter.create_documents([transcript])
 
-    # Embed & store
     embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
     vector_store = FAISS.from_documents(chunks, embeddings)
     retriever = vector_store.as_retriever(search_type="similarity", search_kwargs={'k': 4})
 
-    # Prompt
     def format_docs(docs):
         return "\n\n".join(doc.page_content for doc in docs)
 
@@ -72,12 +66,9 @@ def ask(query: Query):
     parser = StrOutputParser()
 
     try:
-        # Retrieve relevant docs and format context
         docs = retriever.get_relevant_documents(question)
         context = format_docs(docs)
-        # Prepare prompt input
         prompt_input = {"context": context, "question": question}
-        # Generate answer
         answer = llm.invoke(prompt.format(**prompt_input))
         answer = parser.invoke(answer)
         return {"answer": answer}
