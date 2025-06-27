@@ -1,21 +1,31 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>YouTube RAG</title>
     <link rel="stylesheet" href="styles.css" />
 </head>
 
 <body>
-    <h2>YouTube Video Q&A</h2>
-    <textarea id="question" placeholder="Ask a question about this video..."></textarea>
-    <div class="btn-group">
-        <button id="askBtn">Ask</button>
-        <button id="clearBtn">Clear</button>
+    <div class="container">
+        <h1>YouTube Q&A</h1>
+        <textarea id="question" placeholder="What do you want to know about this video?"></textarea>
+
+        <div class="buttons">
+            <button id="askBtn">🤖 Ask</button>
+            <button id="clearBtn">🧹 Clear</button>
+        </div>
+
+        <div id="loading" class="hidden"> Thinking...</div>
+
+        <div id="responseBox">
+            <p id="response" class="placeholder">Your answer will appear here.</p>
+            <button id="copyBtn" class="hidden"> Copy Answer</button>
+        </div>
     </div>
-    <p id="loading" class="hidden"> Thinking...</p>
-    <p id="response">Your answer will appear here.</p>
-    <button id="copyBtn" class="hidden"> Copy Answer</button>
+
     <script src="popup.js"></script>
 </body>
 

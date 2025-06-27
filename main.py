@@ -60,7 +60,7 @@ def ask(query: Query):
         Answer ONLY from the provided transcript context.
         If the context is insufficient, say you don't know.
 
-        {context}
+        {cexontt}
         Question: {question}
         """,
         input_variables=["context", "question"]
